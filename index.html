@@ -72,9 +72,7 @@
   .recibo-det div:last-child{border-bottom:0}
   .recibo-det span{color:var(--sutil)}
   .recibo-det b{text-align:right}
-  .aviso-proto{background:#FFF4D6;border:1px solid #E5C877;color:#7a5a00;border-radius:12px;padding:12px 15px;font-size:14px;text-align:center}
-  .aviso-teste{background:#FFF4D6;border:1px solid #E5C877;color:#7a5a00;border-radius:12px;padding:11px 14px;font-size:14px;line-height:1.45;text-align:center}
-  .erro-msg{color:var(--erro);font-size:15.5px;font-weight:600;display:none}
+  .aviso-proto{background:#FFF4D6;border:1px solid #E5C877;color:#7a5a00;border-radius:12px;padding:12px 15px;font-size:14px;text-align:center}  .erro-msg{color:var(--erro);font-size:15.5px;font-weight:600;display:none}
   footer{padding:0 20px 18px;text-align:center;font-size:12.5px;color:var(--sutil)}
   .oculta{display:none!important}
 </style>
@@ -93,9 +91,7 @@
 <!-- TELA 1: tipo -->
 <main id="t1">
   <h2 style="text-align:center">O que você está vendo aí?</h2>
-  <p class="ajuda" style="text-align:center">Leva menos de 1 minuto. É só tocar em uma das <span class="junto">opções 👇</span></p>
-  <div class="aviso-teste">Versão de teste, ainda não é o canal oficial da Sabesp. Se for emergência, liga <b>195</b> 📞</div>
-  <button class="cartaozao agua" onclick="escolher('água')">
+  <p class="ajuda" style="text-align:center">Leva menos de 1 minuto. É só tocar em uma das <span class="junto">opções 👇</span></p>  <button class="cartaozao agua" onclick="escolher('água')">
     <span class="icone">💧</span>
     <span><b>Vazamento de água</b><span>Água limpa escorrendo pela rua ou calçada</span></span>
   </button>
@@ -160,7 +156,7 @@
     <button class="btn" onclick="reiniciar()">Registrar outro aviso</button>
   </div>
 </main>
-<footer>Protótipo Vazou? Avisa! Seus dados ficam no seu aparelho.<br>versão 0.5 · 11/09/2026</footer>
+<footer>Protótipo Vazou? Avisa! Seus dados ficam no seu aparelho.<br>versão 0.6 · 11/09/2026</footer>
 </div>
 <script>
 "use strict";
@@ -240,21 +236,30 @@ function pedirGps(automatico){
     atualizaEndereco('Seu navegador não tem GPS. Toca no mapa para marcar o lugar do vazamento 😉');
     return;
   }
-  if(!automatico)atualizaEndereco('Ligando o GPS…');
-  navigator.geolocation.getCurrentPosition(p=>{
+  atualizaEndereco(automatico?'Estamos te procurando no mapa…':'Ligando o GPS…');
+  const achou=p=>{
     pino.setLatLng([p.coords.latitude,p.coords.longitude]);
     mapa.setView([p.coords.latitude,p.coords.longitude],18);
-    est.gpsOk=true;
     fixaLocal(p.coords.latitude,p.coords.longitude,false);
-  },err=>{
+  };
+  const falhou=err=>{
+    const code=err&&err.code;
     if(!window.isSecureContext){
       atualizaEndereco('Nesta versão de teste o GPS fica de fora (ele só liga quando o app estiver publicado na internet). Toca no mapa e arrasta o pino, funciona igualzinho 😉');
-    }else if(err&&err.code===1){
-      atualizaEndereco('Seu celular não liberou a localização 😕 Libera nas permissões do navegador, ou toca no mapa para marcar o lugar.');
+    }else if(code===1){
+      atualizaEndereco('Seu celular bloqueou a localização para este site 😕 Toca no cadeado (ou no ícone de ajustes) ao lado do endereço, entra em Permissões e libera a Localização. Ou toca no mapa para marcar o lugar.');
+    }else if(code===2){
+      atualizaEndereco('Não achamos sinal de GPS 📡 Confere se a localização do celular está ligada, ou toca no mapa para marcar o lugar.');
     }else{
-      atualizaEndereco('O GPS não respondeu por aqui. Toca no mapa para marcar o lugar do vazamento.');
+      atualizaEndereco('O GPS demorou para responder. Tenta de novo em "Usar minha localização", ou toca no mapa para marcar o lugar.');
     }
-  },{enableHighAccuracy:true,timeout:9000});
+  };
+  // 1ª tentativa: alta precisão. Se demorar ou não achar sinal, 2ª tentativa mais tolerante (rede/wi-fi, aceita posição recente)
+  navigator.geolocation.getCurrentPosition(achou,err=>{
+    if(err&&(err.code===2||err.code===3)){
+      navigator.geolocation.getCurrentPosition(achou,falhou,{enableHighAccuracy:false,timeout:20000,maximumAge:60000});
+    }else falhou(err);
+  },{enableHighAccuracy:true,timeout:10000,maximumAge:0});
 }
 /* fotos com carimbo */
 function abrirCamera(slot){
