@@ -63,11 +63,18 @@
   .endereco b{color:var(--ink)}
   .chip-un{display:inline-block;background:#E5F4FC;color:#005B8E;font-weight:600;border-radius:8px;padding:2px 9px;font-size:14px}
   label{font-weight:600;font-size:16.5px;display:block;margin-bottom:6px}
-  input[type=text],input[type=tel],textarea{width:100%;padding:16px;font:inherit;font-size:17.5px;border:1.5px solid var(--fio);border-radius:12px;background:var(--branco);color:var(--ink)}
+  input[type=text],input[type=tel],input[type=email],textarea{width:100%;padding:16px;font:inherit;font-size:17.5px;border:1.5px solid var(--fio);border-radius:12px;background:var(--branco);color:var(--ink)}
   input:focus,textarea:focus{outline:2px solid var(--acento);border-color:var(--acento)}
   textarea{resize:none}
   .consent{display:flex;gap:12px;align-items:flex-start;background:var(--branco);border:1px solid var(--fio);border-radius:12px;padding:15px;font-size:14.5px;color:var(--muted)}
   .consent input{width:26px;height:26px;margin:1px 0 0;flex:0 0 auto;accent-color:var(--acento)}
+  .escolha{display:flex;align-items:center;gap:14px;width:100%;border:2px solid var(--fio);border-radius:16px;background:var(--branco);padding:16px;font:inherit;cursor:pointer;text-align:left;transition:transform .06s, border-color .15s}
+  .escolha:active{transform:scale(.985)}
+  .escolha .icone-esc{width:48px;height:48px;border-radius:12px;background:var(--agua-bg);display:flex;align-items:center;justify-content:center;font-size:25px;flex:0 0 auto}
+  .escolha b{font-size:18px;display:block}
+  .escolha span{color:var(--sutil);font-size:14.5px}
+  .escolha.sel{border-color:var(--acento);background:var(--agua-bg)}
+  #blocoContato{display:flex;flex-direction:column;gap:16px}
   .recibo{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding-top:22px}
   .recibo .check{width:92px;height:92px;border-radius:50%;background:#E6F3E9;color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:48px}
   .recibo h2{font-size:27px}
@@ -129,23 +136,38 @@
   <button class="btn fantasma" onclick="irPara(1)">‹ Voltar</button>
 </main>
 
-<!-- TELA 3: contato -->
+<!-- TELA 3: retorno -->
 <main id="t3" class="oculta">
-  <h2>Pra gente te dar um <span class="junto">retorno 😊</span></h2>
-  <p class="ajuda">Prometemos usar seu contato só para falar deste aviso.</p>
-  <div>
-    <label for="nome">Seu nome</label>
-    <input type="text" id="nome" placeholder="Como você gosta de ser chamado" autocomplete="name">
+  <h2>Quer receber retorno deste <span class="junto">aviso? 😊</span></h2>
+  <p class="ajuda">Seu aviso vale do mesmo jeito com ou sem contato. Você <span class="junto">escolhe 💙</span></p>
+  <button class="escolha" id="escSim" onclick="escolherRetorno(true)">
+    <span class="icone-esc">📬</span>
+    <span><b>Quero receber retorno</b><span>Deixa seu e-mail e a gente te conta quando cuidar do aviso</span></span>
+  </button>
+  <button class="escolha" id="escAnon" onclick="escolherRetorno(false)">
+    <span class="icone-esc">🕶️</span>
+    <span><b>Prefiro não me identificar</b><span>Sem problema! Só guarde o protocolo da próxima tela</span></span>
+  </button>
+  <div id="blocoContato" class="oculta">
+    <div>
+      <label for="email">Seu e-mail</label>
+      <input type="email" id="email" placeholder="voce@email.com.br" autocomplete="email" inputmode="email">
+    </div>
+    <div>
+      <label for="nome">Seu nome <span style="font-weight:400;color:var(--sutil)">(se quiser)</span></label>
+      <input type="text" id="nome" placeholder="Como você gosta de ser chamado" autocomplete="name">
+    </div>
+    <div>
+      <label for="fone">Seu celular <span style="font-weight:400;color:var(--sutil)">(se quiser)</span></label>
+      <input type="tel" id="fone" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="tel">
+    </div>
+    <label class="consent" style="font-weight:400">
+      <input type="checkbox" id="lgpd">
+      <span>Autorizo o uso do meu contato, das fotos e da localização <b>apenas para cuidar deste aviso de vazamento</b>, como manda a Lei Geral de Proteção de Dados.</span>
+    </label>
   </div>
-  <div>
-    <label for="fone">Seu celular</label>
-    <input type="tel" id="fone" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="tel">
-  </div>
-  <label class="consent" style="font-weight:400">
-    <input type="checkbox" id="lgpd">
-    <span>Autorizo o uso do meu nome, telefone, fotos e localização <b>apenas para cuidar deste aviso de vazamento</b>, como manda a Lei Geral de Proteção de Dados.</span>
-  </label>
-  <div class="erro-msg" id="erro3">Faltou preencher o nome, o celular e marcar a autorização, tá bom?</div>
+  <div class="erro-msg" id="erro3sel">Escolhe uma das duas opções aí em cima, <span class="junto">tá bom? 😉</span></div>
+  <div class="erro-msg" id="erro3">Confere o e-mail e a autorização, tá bom?</div>
   <button class="btn" onclick="enviar()">Enviar meu aviso 💙</button>
   <button class="btn fantasma" onclick="irPara(2)">‹ Voltar</button>
 </main>
@@ -162,7 +184,7 @@
     <button class="btn" onclick="reiniciar()">Registrar outro aviso</button>
   </div>
 </main>
-<footer>Protótipo Vazou? Avisa! Seus dados ficam no seu aparelho.<br>versão 0.8 · 11/09/2026</footer>
+<footer>Protótipo Vazou? Avisa! Seus dados ficam no seu aparelho.<br>versão 0.9 · 12/09/2026</footer>
 <div id="visor" class="oculta" onclick="this.classList.add('oculta')">
   <img alt="foto ampliada">
   <div class="dica">A data, a hora e a posição ficam gravadas na parte de baixo da foto</div>
@@ -185,12 +207,12 @@ function unidadeDoPonto(lat,lon){
   for(const f of UN_POLY)if(f.g.some(a=>dentroAnel(lon,lat,a)))return {sigla:f.s,nome:f.n};
   return null;
 }
-const est={tipo:null,fotos:[null,null],lat:-23.55,lon:-46.63,gpsOk:false,endereco:'',un:null,slot:0,gpsPedido:false};
+const est={tipo:null,fotos:[null,null],lat:-23.55,lon:-46.63,gpsOk:false,endereco:'',un:null,slot:0,gpsPedido:false,retorno:null};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function irPara(n){
   for(let i=1;i<=4;i++)document.getElementById('t'+i).classList.toggle('oculta',i!==n);
   for(let i=1;i<=3;i++)document.getElementById('p'+i).classList.toggle('on',i<=Math.min(n,3));
-  ['erro2','erro2loc','erro3'].forEach(id=>document.getElementById(id).style.display='none');
+  ['erro2','erro2loc','erro3','erro3sel'].forEach(id=>document.getElementById(id).style.display='none');
   window.scrollTo(0,0);
   if(n===2)setTimeout(()=>{mapa.invalidateSize();},60);
 }
@@ -348,13 +370,35 @@ window.irPara=function(n){
   }
   irPara3Original(n);
 };
+function escolherRetorno(sim){
+  est.retorno=sim;
+  document.getElementById('escSim').classList.toggle('sel',sim);
+  document.getElementById('escAnon').classList.toggle('sel',!sim);
+  document.getElementById('blocoContato').classList.toggle('oculta',!sim);
+  document.getElementById('erro3sel').style.display='none';
+  document.getElementById('erro3').style.display='none';
+  if(!sim)document.getElementById('lgpd').checked=false;
+}
 function enviar(){
-  const nome=document.getElementById('nome').value.trim();
-  const fone=document.getElementById('fone').value.trim();
-  const lgpd=document.getElementById('lgpd').checked;
-  if(!nome||fone.replace(/\D/g,'').length<10||!lgpd){
-    document.getElementById('erro3').style.display='block';
+  const erro3=document.getElementById('erro3');
+  erro3.style.display='none';
+  if(est.retorno===null){
+    document.getElementById('erro3sel').style.display='block';
     return;
+  }
+  let contatoTxt='sem identificação, como você pediu';
+  if(est.retorno){
+    const nome=document.getElementById('nome').value.trim();
+    const email=document.getElementById('email').value.trim();
+    const fone=document.getElementById('fone').value.trim();
+    const lgpd=document.getElementById('lgpd').checked;
+    const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    let msg='';
+    if(!emailOk)msg='Confere o e-mail? Parece que ele não está certinho 😉';
+    else if(fone&&fone.replace(/\D/g,'').length<10)msg='O celular parece incompleto, confere os números?';
+    else if(!lgpd)msg='Faltou marcar a autorização para a gente poder te responder, tá bom?';
+    if(msg){erro3.textContent=msg;erro3.style.display='block';return;}
+    contatoTxt=(nome?nome+' · ':'')+email+(fone?' · '+fone:'');
   }
   const agora=new Date();
   const proto='VAZ-'+agora.getFullYear()+'-'+String(Math.floor(100000+Math.random()*899999));
@@ -366,7 +410,7 @@ function enviar(){
     ['Região', est.un?est.un.nome+' ('+est.un.sigla+')':'a confirmar'],
     ['Fotos', fotos+' foto'+(fotos>1?'s':'')+' com data e hora'],
     ['Registrado em', agora.toLocaleDateString('pt-BR')+' às '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})],
-    ['Retorno para', nome+' · '+fone]
+    ['Retorno', contatoTxt]
   ];
   document.getElementById('reciboDet').innerHTML=linhas.map(l=>'<div><span>'+l[0]+'</span><b>'+esc(l[1])+'</b></div>').join('');
   irPara3Original(4);
@@ -376,8 +420,13 @@ function reiniciar(){
   removeFoto(0);removeFoto(1);
   document.getElementById('obs').value='';
   document.getElementById('nome').value='';
+  document.getElementById('email').value='';
   document.getElementById('fone').value='';
   document.getElementById('lgpd').checked=false;
+  est.retorno=null;
+  document.getElementById('escSim').classList.remove('sel');
+  document.getElementById('escAnon').classList.remove('sel');
+  document.getElementById('blocoContato').classList.add('oculta');
   document.querySelectorAll('.cartaozao').forEach(c=>c.classList.remove('sel'));
   irPara3Original(1);
 }
