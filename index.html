@@ -182,7 +182,7 @@
     <button class="btn" onclick="reiniciar()">Registrar outra ocorrência</button>
   </div>
 </main>
-<footer>Eu vi um Vazamento · uso interno Sabesp<br>versão 1.6 · 22/09/2026</footer>
+<footer>Eu vi um Vazamento · uso interno Sabesp<br>versão 1.7 · 22/09/2026</footer>
 <div id="visor" class="oculta" onclick="this.classList.add('oculta')">
   <img alt="foto ampliada">
   <div class="dica">A data, a hora e a posição ficam gravadas na parte de baixo da foto</div>
@@ -214,7 +214,7 @@ function poloDoPonto(lat,lon){
 const FLUXO_URL='https://default5f9d74c8ec924488a2c7bdce634262.fa.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/09/workflows/bce1fedcb8fe40a4a0a11ded5761028e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zqk64LjxNQkP-TcFXAKWHDWGfWAXmgLJZmpl8tBwB0Y';
 const EMAIL_TESTE=['rzamora@sabesp.com.br','marquesa@sabesp.com.br','chsimoes@sabesp.com.br'];
 const TIPOS={'água':{recibo:'💧 Vazamento de água',email:'Vazamento de água'},'esgoto':{recibo:'🟤 Esgoto na rua',email:'Esgoto na rua'},'vala':{recibo:'🚧 Vala',email:'Vala'},'pv':{recibo:'⚠️ PV com tampa exposta',email:'PV - tampa exposta ou desnivelada'}};
-const est={tipo:null,fotos:[null,null],lat:-23.55,lon:-46.63,gpsOk:false,endereco:'',un:null,polo:null,slot:0,gpsPedido:false,protoAtual:null,gpsLat:null,gpsLon:null,foraConfirmado:false,longeConfirmado:false};
+const est={tipo:null,fotos:[null,null],lat:-23.55,lon:-46.63,gpsOk:false,endereco:'',un:null,polo:null,slot:0,gpsPedido:false,protoAtual:null,gpsLat:null,gpsLon:null,ruaGps:null,fixManual:false,foraConfirmado:false,longeConfirmado:false};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function irPara(n){
   for(let i=1;i<=4;i++)document.getElementById('t'+i).classList.toggle('oculta',i!==n);
@@ -237,6 +237,7 @@ pino.on('dragend',()=>{const p=pino.getLatLng();fixaLocal(p.lat,p.lng,true);});
 mapa.on('click',e=>{pino.setLatLng(e.latlng);fixaLocal(e.latlng.lat,e.latlng.lng,true);});
 let geoTimer=null;
 function fixaLocal(lat,lon,manual){
+  est.fixManual=!!manual;
   est.lat=lat;est.lon=lon;est.gpsOk=true;
   document.getElementById('erro2loc').style.display='none';
   est.un=unidadeDoPonto(lat,lon);est.polo=poloDoPonto(lat,lon);est.foraConfirmado=false;est.longeConfirmado=false;atualizaForaAviso();
@@ -245,6 +246,8 @@ function fixaLocal(lat,lon,manual){
   geoTimer=setTimeout(async()=>{
     const e=await geoReversa(lat,lon);
     est.endereco=e?((e.rua?e.rua+', ':'')+(e.bairro?e.bairro+', ':'')+(e.municipio||'')):'';
+    if(!est.fixManual&&e&&e.rua)est.ruaGps=e.rua;
+    atualizaForaAviso();
     atualizaEndereco();
   },350);
 }
@@ -392,15 +395,21 @@ function mostraAviso(el,liga,display){
   el.style.display=liga?display:'none';
   if(liga&&!antes)setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center'}),150);
 }
+function ruaDoPino(){return est.endereco?est.endereco.split(',')[0].trim():'';}
+function ruaTrocada(){
+  const rp=ruaDoPino();
+  return !!(est.fixManual&&est.ruaGps&&rp&&rp.toLowerCase()!==est.ruaGps.toLowerCase());
+}
 function atualizaForaAviso(){
   const f=document.getElementById('foraPiloto');
   if(f)mostraAviso(f,!est.polo,'block');
   const a=document.getElementById('avisoDist');
   if(a){
     const d=est.gpsLat!=null?distanciaM(est.gpsLat,est.gpsLon,est.lat,est.lon):null;
-    const liga=d!=null&&d>300;
-    if(liga)a.querySelector('span').textContent='O pino está a '+fmtDist(d)+' de onde você está. Confere se é o ponto certo da ocorrência.';
-    mostraAviso(a,liga,'flex');
+    const longe=d!=null&&d>300, rua=ruaTrocada();
+    if(longe)a.querySelector('span').textContent='O pino está a '+fmtDist(d)+' de onde você está. Confere se é o ponto certo da ocorrência.';
+    else if(rua)a.querySelector('span').textContent='O pino foi para a '+ruaDoPino()+', mas você está na '+est.ruaGps+'. Confere se é o ponto certo da ocorrência.';
+    mostraAviso(a,longe||rua,'flex');
   }
 }
 function distanciaM(lat1,lon1,lat2,lon2){
@@ -467,6 +476,7 @@ async function enviar(){
     if(est.gpsLat!=null){
       const d=distanciaM(est.gpsLat,est.gpsLon,est.lat,est.lon);
       if(d>300)audit.push('pino ajustado a '+(d>=1000?(d/1000).toFixed(1)+' km':d+' m')+' do GPS do aparelho');
+      if(ruaTrocada())audit.push('pino na '+ruaDoPino()+', GPS do aparelho na '+est.ruaGps);
     }else{
       audit.push('sem sinal de GPS - local marcado manualmente no mapa');
     }
@@ -520,7 +530,7 @@ function reiniciar(){
   removeFoto(0);removeFoto(1);
   document.getElementById('obs').value='';
   est.gpsOk=false;est.endereco='';est.un=null;est.polo=null;est.gpsPedido=false;
-  est.gpsLat=null;est.gpsLon=null;est.foraConfirmado=false;est.longeConfirmado=false;
+  est.gpsLat=null;est.gpsLon=null;est.ruaGps=null;est.fixManual=false;est.foraConfirmado=false;est.longeConfirmado=false;
   document.getElementById('foraPiloto').style.display='none';
   document.getElementById('avisoDist').style.display='none';
   est.lat=-23.55;est.lon=-46.63;
