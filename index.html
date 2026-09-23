@@ -182,7 +182,7 @@
     <button class="btn" onclick="reiniciar()">Registrar outra ocorrência</button>
   </div>
 </main>
-<footer>Eu vi um Vazamento · uso interno Sabesp<br>versão 1.7 · 22/09/2026</footer>
+<footer>Eu vi um Vazamento · uso interno Sabesp<br>versão 1.8 · 22/09/2026</footer>
 <div id="visor" class="oculta" onclick="this.classList.add('oculta')">
   <img alt="foto ampliada">
   <div class="dica">A data, a hora e a posição ficam gravadas na parte de baixo da foto</div>
@@ -212,7 +212,7 @@ function poloDoPonto(lat,lon){
 }
 /* Envio real: fluxo Power Automate. Na FASE DE TESTE os 3 enderecos abaixo recebem tudo. */
 const FLUXO_URL='https://default5f9d74c8ec924488a2c7bdce634262.fa.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/09/workflows/bce1fedcb8fe40a4a0a11ded5761028e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zqk64LjxNQkP-TcFXAKWHDWGfWAXmgLJZmpl8tBwB0Y';
-const EMAIL_TESTE=['rzamora@sabesp.com.br','marquesa@sabesp.com.br','chsimoes@sabesp.com.br'];
+const EMAIL_TESTE=['rzamora@sabesp.com.br','marquesa@sabesp.com.br','chsimoes@sabesp.com.br','jgsilva@sabesp.com.br'];
 const TIPOS={'água':{recibo:'💧 Vazamento de água',email:'Vazamento de água'},'esgoto':{recibo:'🟤 Esgoto na rua',email:'Esgoto na rua'},'vala':{recibo:'🚧 Vala',email:'Vala'},'pv':{recibo:'⚠️ PV com tampa exposta',email:'PV - tampa exposta ou desnivelada'}};
 const est={tipo:null,fotos:[null,null],lat:-23.55,lon:-46.63,gpsOk:false,endereco:'',un:null,polo:null,slot:0,gpsPedido:false,protoAtual:null,gpsLat:null,gpsLon:null,ruaGps:null,fixManual:false,foraConfirmado:false,longeConfirmado:false};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
