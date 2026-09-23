@@ -31,13 +31,15 @@
   #t2 h2,#t3 h2{font-size:22px}
   .ajuda{color:var(--sutil);font-size:15.5px;margin:0}
   .junto{white-space:nowrap}
-  .cartaozao{display:flex;align-items:center;gap:15px;width:100%;border:2px solid var(--fio);border-radius:18px;background:var(--branco);padding:17px 42px 17px 16px;font:inherit;cursor:pointer;text-align:left;transition:transform .06s, border-color .15s;box-shadow:0 2px 10px rgba(11,31,51,.07);position:relative}
-  .cartaozao::after{content:"›";position:absolute;right:15px;top:50%;transform:translateY(-50%);font-size:26px;color:#A6B3BA;font-weight:600}
-  .cartaozao:active{transform:scale(.985)}
-  .cartaozao .icone{width:60px;height:60px;border-radius:15px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-  .cartaozao .icone svg{width:37px;height:37px}
-  .cartaozao b{font-size:19px;display:block}
-  .cartaozao span{color:var(--sutil);font-size:15px}
+  #t1{gap:13px}
+  #t1 h2{margin-top:2px}
+  .cartaozao{display:flex;align-items:center;gap:14px;width:100%;min-height:106px;border:2px solid var(--fio);border-radius:18px;background:var(--branco);padding:16px 44px 16px 16px;font:inherit;cursor:pointer;text-align:left;transition:transform .06s, border-color .15s, box-shadow .15s;box-shadow:0 1px 2px rgba(11,31,51,.05), 0 5px 16px rgba(11,31,51,.08);position:relative}
+  .cartaozao::after{content:"›";position:absolute;right:17px;top:50%;transform:translateY(-52%);font-size:24px;color:#B9C4CB;font-weight:600}
+  .cartaozao:active{transform:scale(.98);box-shadow:0 1px 3px rgba(11,31,51,.08)}
+  .cartaozao .icone{width:58px;height:58px;border-radius:15px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(11,31,51,.06)}
+  .cartaozao .icone svg{width:35px;height:35px}
+  .cartaozao b{font-size:18.5px;line-height:1.2;display:block;margin-bottom:3px;color:var(--ink)}
+  .cartaozao span{color:var(--sutil);font-size:14px;line-height:1.35}
   .cartaozao.agua .icone{background:linear-gradient(150deg,#EAF7FF,#CFEBFB)}
   .cartaozao.agua:active,.cartaozao.agua.sel{border-color:var(--agua)}
   .cartaozao.esgoto .icone{background:linear-gradient(150deg,#F8F0E5,#EDDCC5)}
@@ -132,6 +134,7 @@
   <button class="btn-gps" onclick="pedirGps(false)">📍 Usar minha localização</button>
   <div class="endereco"><span class="pin">📍</span><span id="endTxt">Estamos te procurando no mapa…</span></div>
   <div class="erro-msg" id="foraPiloto">🧭 Este ponto está fora da área do piloto (UN Leste). Confere se o pino está no lugar certo.</div>
+  <div class="destino fora" id="avisoDist" style="display:none">📏 <span></span></div>
   <div id="diag" style="display:none;font-size:11.5px;color:var(--sutil);margin-top:-8px;padding-left:4px"></div>
   <div>
     <label for="obs">Quer contar mais alguma coisa? <span style="font-weight:400;color:var(--sutil)">(se quiser)</span></label>
@@ -179,7 +182,7 @@
     <button class="btn" onclick="reiniciar()">Registrar outra ocorrência</button>
   </div>
 </main>
-<footer>Eu vi um Vazamento · uso interno Sabesp<br>versão 1.3 · 22/09/2026</footer>
+<footer>Eu vi um Vazamento · uso interno Sabesp<br>versão 1.5 · 22/09/2026</footer>
 <div id="visor" class="oculta" onclick="this.classList.add('oculta')">
   <img alt="foto ampliada">
   <div class="dica">A data, a hora e a posição ficam gravadas na parte de baixo da foto</div>
@@ -211,7 +214,7 @@ function poloDoPonto(lat,lon){
 const FLUXO_URL='https://default5f9d74c8ec924488a2c7bdce634262.fa.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/09/workflows/bce1fedcb8fe40a4a0a11ded5761028e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zqk64LjxNQkP-TcFXAKWHDWGfWAXmgLJZmpl8tBwB0Y';
 const EMAIL_TESTE=['rzamora@sabesp.com.br','marquesa@sabesp.com.br','chsimoes@sabesp.com.br'];
 const TIPOS={'água':{recibo:'💧 Vazamento de água',email:'Vazamento de água'},'esgoto':{recibo:'🟤 Esgoto na rua',email:'Esgoto na rua'},'vala':{recibo:'🚧 Vala',email:'Vala'},'pv':{recibo:'⚠️ PV com tampa exposta',email:'PV - tampa exposta ou desnivelada'}};
-const est={tipo:null,fotos:[null,null],lat:-23.55,lon:-46.63,gpsOk:false,endereco:'',un:null,polo:null,slot:0,gpsPedido:false,protoAtual:null,gpsLat:null,gpsLon:null,foraConfirmado:false};
+const est={tipo:null,fotos:[null,null],lat:-23.55,lon:-46.63,gpsOk:false,endereco:'',un:null,polo:null,slot:0,gpsPedido:false,protoAtual:null,gpsLat:null,gpsLon:null,foraConfirmado:false,longeConfirmado:false};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function irPara(n){
   for(let i=1;i<=4;i++)document.getElementById('t'+i).classList.toggle('oculta',i!==n);
@@ -236,7 +239,7 @@ let geoTimer=null;
 function fixaLocal(lat,lon,manual){
   est.lat=lat;est.lon=lon;est.gpsOk=true;
   document.getElementById('erro2loc').style.display='none';
-  est.un=unidadeDoPonto(lat,lon);est.polo=poloDoPonto(lat,lon);est.foraConfirmado=false;atualizaForaAviso();
+  est.un=unidadeDoPonto(lat,lon);est.polo=poloDoPonto(lat,lon);est.foraConfirmado=false;est.longeConfirmado=false;atualizaForaAviso();
   atualizaEndereco('Confirmando o endereço…');
   clearTimeout(geoTimer);
   geoTimer=setTimeout(async()=>{
@@ -383,9 +386,18 @@ window.irPara=function(n){
   }
   irPara3Original(n);
 };
+function fmtDist(m){return m>=1000?(m/1000).toFixed(1).replace('.',',')+' km':m+' m';}
 function atualizaForaAviso(){
   const f=document.getElementById('foraPiloto');
   if(f)f.style.display=est.polo?'none':'block';
+  const a=document.getElementById('avisoDist');
+  if(a){
+    const d=est.gpsLat!=null?distanciaM(est.gpsLat,est.gpsLon,est.lat,est.lon):null;
+    if(d!=null&&d>300){
+      a.querySelector('span').textContent='O pino está a '+fmtDist(d)+' de onde você está. Confere se é o ponto certo da ocorrência.';
+      a.style.display='flex';
+    }else a.style.display='none';
+  }
 }
 function distanciaM(lat1,lon1,lat2,lon2){
   const R=6371000,rad=Math.PI/180;
@@ -426,6 +438,15 @@ async function enviar(){
     erro3.textContent='Este ponto está fora da área coberta pelo piloto (UN Leste) 🧭 Confere o pino no mapa. Se o local estiver certo mesmo, toca em Enviar de novo que a gente registra assim.';
     erro3.style.display='block';
     return;
+  }
+  if(est.gpsLat!=null&&!est.longeConfirmado){
+    const dL=distanciaM(est.gpsLat,est.gpsLon,est.lat,est.lon);
+    if(dL>2000){
+      est.longeConfirmado=true;
+      erro3.textContent='O pino está a '+fmtDist(dL)+' da sua posição 📏 Se o local da ocorrência estiver certo mesmo, toca em Enviar de novo.';
+      erro3.style.display='block';
+      return;
+    }
   }
   salvaRegistro(nome,fone,unidade);
   const agora=new Date();
@@ -495,8 +516,9 @@ function reiniciar(){
   removeFoto(0);removeFoto(1);
   document.getElementById('obs').value='';
   est.gpsOk=false;est.endereco='';est.un=null;est.polo=null;est.gpsPedido=false;
-  est.gpsLat=null;est.gpsLon=null;est.foraConfirmado=false;
+  est.gpsLat=null;est.gpsLon=null;est.foraConfirmado=false;est.longeConfirmado=false;
   document.getElementById('foraPiloto').style.display='none';
+  document.getElementById('avisoDist').style.display='none';
   est.lat=-23.55;est.lon=-46.63;
   pino.setLatLng([est.lat,est.lon]);mapa.setView([est.lat,est.lon],17);
   atualizaEndereco('Estamos te procurando no mapa…');
