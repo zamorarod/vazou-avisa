@@ -182,7 +182,7 @@
     <button class="btn" onclick="reiniciar()">Registrar outra ocorrência</button>
   </div>
 </main>
-<footer>Eu vi um Vazamento · uso interno Sabesp<br>versão 1.5 · 22/09/2026</footer>
+<footer>Eu vi um Vazamento · uso interno Sabesp<br>versão 1.6 · 22/09/2026</footer>
 <div id="visor" class="oculta" onclick="this.classList.add('oculta')">
   <img alt="foto ampliada">
   <div class="dica">A data, a hora e a posição ficam gravadas na parte de baixo da foto</div>
@@ -387,16 +387,20 @@ window.irPara=function(n){
   irPara3Original(n);
 };
 function fmtDist(m){return m>=1000?(m/1000).toFixed(1).replace('.',',')+' km':m+' m';}
+function mostraAviso(el,liga,display){
+  const antes=el.style.display!=='none'&&el.style.display!=='';
+  el.style.display=liga?display:'none';
+  if(liga&&!antes)setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center'}),150);
+}
 function atualizaForaAviso(){
   const f=document.getElementById('foraPiloto');
-  if(f)f.style.display=est.polo?'none':'block';
+  if(f)mostraAviso(f,!est.polo,'block');
   const a=document.getElementById('avisoDist');
   if(a){
     const d=est.gpsLat!=null?distanciaM(est.gpsLat,est.gpsLon,est.lat,est.lon):null;
-    if(d!=null&&d>300){
-      a.querySelector('span').textContent='O pino está a '+fmtDist(d)+' de onde você está. Confere se é o ponto certo da ocorrência.';
-      a.style.display='flex';
-    }else a.style.display='none';
+    const liga=d!=null&&d>300;
+    if(liga)a.querySelector('span').textContent='O pino está a '+fmtDist(d)+' de onde você está. Confere se é o ponto certo da ocorrência.';
+    mostraAviso(a,liga,'flex');
   }
 }
 function distanciaM(lat1,lon1,lat2,lon2){
